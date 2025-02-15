@@ -15,9 +15,9 @@ companyApp.use((req, res, next) => {
 });
 
 // Create a new user
-companyApp.post('/user', expressAsyncHandler(async (req, res) => {
+companyApp.post('/register', expressAsyncHandler(async (req, res) => {
     const newUser = req.body;
-    const existingUser = await companyCollection.findOne({ username: newUser.username });
+    const existingUser = await companyCollection.findOne({ email: newUser.email });
 
     if (existingUser) {
         return res.status(400).json({ message: 'User already exists' });
@@ -31,10 +31,10 @@ companyApp.post('/user', expressAsyncHandler(async (req, res) => {
 // User login
 companyApp.post('/login', expressAsyncHandler(async (req, res) => {
     const userCred = req.body;
-    const dbUser = await companyCollection.findOne({ username: userCred.username });
+    const dbUser = await companyCollection.findOne({ email: userCred.email });
 
     if (!dbUser) {
-        return res.status(401).json({ message: 'Invalid username' });
+        return res.status(401).json({ message: 'Invalid email' });
     }
 
     const isPasswordCorrect = await bcryptjs.compare(userCred.password, dbUser.password);
@@ -43,7 +43,7 @@ companyApp.post('/login', expressAsyncHandler(async (req, res) => {
     }
 
     const token = jwt.sign(
-        { username: dbUser.username },
+        { email: dbUser.email },
         process.env.SECRET_KEY,  // Fixed key name
         { expiresIn: '1d' }
     );
