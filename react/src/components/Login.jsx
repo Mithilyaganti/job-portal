@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Form, Button, Container, Row, Col } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+
 import axios from "axios";
 
 const Login = () => {
@@ -8,6 +10,7 @@ const Login = () => {
         email: "",
         password: "",
     });
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,7 +19,7 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:3000/apis/login", {
+            const response = await axios.post("http://localhost:4000/apis/login", {
                 userType,
                 ...formData,
             });
@@ -24,6 +27,13 @@ const Login = () => {
             alert(response.data.message);
             localStorage.setItem("token", response.data.token); // Store JWT Token
             localStorage.setItem("userType", userType); // Store User Role
+
+            // Navigate based on role
+            if (userType === "student") {
+                navigate("/studentprofile");
+            } else {
+                navigate("/companyprofile");
+            }
         } catch (error) {
             alert(error.response?.data?.message || "Login failed");
         }

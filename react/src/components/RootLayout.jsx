@@ -1,20 +1,18 @@
-import React from 'react'
-import NavigationBar from'./NavigationBar'
-import Footer from './Footer'
-import { Outlet } from 'react-router-dom'
+import React from "react";
+import NavigationBar from "./NavigationBar"; // ✅ Ensure correct import
+import Footer from "./Footer"; // ✅ Ensure correct import
+import { Outlet } from "react-router-dom";
 
 function RootLayout() {
   return (
     <div>
-        <NavigationBar/>
-        <div style={{minHeight:'80vh'}}>
+      <NavigationBar />
+      <div style={{ minHeight: "80vh" }}>
         <Outlet />
-        </div>
-
-        <Footer/>
-
+      </div>
+      <Footer />
     </div>
-  )
+  );
 }
 
-export default RootLayout
+export default RootLayout;
