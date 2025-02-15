@@ -1,9 +1,10 @@
 import React from 'react'
 import Home from './components/Home'
-import footer from './components/Footer'
+// import footer from './components/Footer'
 import RegisterForm from './components/Register'
 import Login from './components/Login'
 import RootLayout from './components/RootLayout'
+import StudentProfile from './components/StudentProfile'
 import {createBrowserRouter, RouterProvider} from 'react-router-dom'
 let router=createBrowserRouter([
       
