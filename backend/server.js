@@ -30,7 +30,7 @@ app.use('/comapany',companyApp)
 app.use((err,req,res,next)=>{
     res.send({message:"error",payload:err.message})
 })
-const port = 3000;
+const port = 4000;
 
 // Start the server and log the port using template literals
 app.listen(port, () => console.log(`Webserver on port ${port}`));
