@@ -14,9 +14,10 @@ studentApp.use((req, res, next) => {
     next();
 });
 
+// Create a new user
 studentApp.post('/user', expressAsyncHandler(async (req, res) => {
     const newUser = req.body;
-    const existingUser = await studentCollection.findOne({ username: newUser.username });
+    const existingUser = await studentCollection.findOne({ email: newUser.email });
 
     if (existingUser) {
         return res.status(400).json({ message: 'User already exists' });
@@ -30,10 +31,10 @@ studentApp.post('/user', expressAsyncHandler(async (req, res) => {
 // User login
 studentApp.post('/login', expressAsyncHandler(async (req, res) => {
     const userCred = req.body;
-    const dbUser = await studentCollection.findOne({ username: userCred.username });
+    const dbUser = await studentCollection.findOne({ email: userCred.email });
 
     if (!dbUser) {
-        return res.status(401).json({ message: 'Invalid username' });
+        return res.status(401).json({ message: 'Invalid email' });
     }
 
     const isPasswordCorrect = await bcryptjs.compare(userCred.password, dbUser.password);
@@ -42,7 +43,7 @@ studentApp.post('/login', expressAsyncHandler(async (req, res) => {
     }
 
     const token = jwt.sign(
-        { username: dbUser.username },
+        { email: dbUser.email },
         process.env.SECRET_KEY,  // Fixed key name
         { expiresIn: '1d' }
     );
