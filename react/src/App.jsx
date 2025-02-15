@@ -1,46 +1,28 @@
-import React from 'react'
-import Home from './components/Home'
-// import footer from './components/Footer'
-import RegisterForm from './components/Register'
-import Login from './components/Login'
-import RootLayout from './components/RootLayout'
-import StudentProfile from './components/StudentProfile'
-import {createBrowserRouter, RouterProvider} from 'react-router-dom'
-let router=createBrowserRouter([
-      
+import React from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Home from "./components/Home";
+import RegisterForm from "./components/Register";
+import Login from "./components/Login";
+import RootLayout from "./components/RootLayout";
+import StudentProfile from "./components/StudentProfile";
+import CompanyProfile from "./components/CompanyProfile"; // ✅ Import Correctly
+
+const router = createBrowserRouter([
   {
-   path:'',
-   element:<RootLayout/>,
-   children:[
-     {
-       path:'',
-       element:<Home/>
-     },
-     {
-       path:'Register',
-       element:<RegisterForm/>
-
-     },
-     {
-       path:'Login',
-       element:<Login/>
-     },
-     {
-      path:'StudentProfile',
-      element:<StudentProfile/>
-     }
-
-   ]
-  }
- ])
-
+    path: "/",
+    element: <RootLayout />,
+    children: [
+      { path: "", element: <Home /> },
+      { path: "register", element: <RegisterForm /> },
+      { path: "login", element: <Login /> },
+      { path: "studentprofile", element: <StudentProfile /> },
+      { path: "companyprofile", element: <CompanyProfile /> }, // ✅ Corrected
+    ],
+  },
+]);
 
 function App() {
-  return (
-    <div>
-       <RouterProvider router={router}/>
-    </div>
-  )
+  return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;

@@ -20,7 +20,7 @@ const RegisterForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:5000/apis/user", {
+            const response = await axios.post("http://localhost:4000/apis/user", {
                 userType,
                 ...formData,
             });
