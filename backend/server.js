@@ -9,8 +9,8 @@ mongoClient.connect(process.env.DB_URL)
 mongoClient.connect(process.env.DB_URL)     
 .then(client=>{
     const coursevita=client.db('coursevita')
-    const studentcollection=blogdb.collection('studentcollection')
-    const companycollection=blogdb.collection('companycollection')
+    const studentcollection=coursevita.collection('studentcollection')
+    const companycollection=coursevita.collection('companycollection')
    
    
     app.set('studentcollection',studentcollection)
@@ -30,7 +30,7 @@ app.use('/comapany',companyApp)
 app.use((err,req,res,next)=>{
     res.send({message:"error",payload:err.message})
 })
-const port = 3000;
+const port = 4000;
 
 // Start the server and log the port using template literals
 app.listen(port, () => console.log(`Webserver on port ${port}`));
