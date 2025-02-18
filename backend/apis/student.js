@@ -1,54 +1,50 @@
 const express = require('express');
-const studentApp = express.Router();
-const bcryptjs = require('bcryptjs');
-const expressAsyncHandler = require('express-async-handler');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const verifyToken = require('../middlewares/verifyToken');  // Fixed path
-
+const expressAsyncHandler = require('express-async-handler');
+const Student = require('../models/studentmodel');
 require('dotenv').config();
 
-let studentCollection;
+const studentApp = express.Router();
 
-studentApp.use((req, res, next) => {
-    studentCollection = req.app.get('studentcollection');
-    next();
-});
+// Student Registration
+studentApp.post('/register', expressAsyncHandler(async (req, res) => {
+    const { email, password, aparId, projects } = req.body;
 
-// Create a new user
-studentApp.post('/user', expressAsyncHandler(async (req, res) => {
-    const newUser = req.body;
-    const existingUser = await studentCollection.findOne({ email: newUser.email });
-
+    // Check if user exists
+    const existingUser = await Student.findOne({ email });
     if (existingUser) {
         return res.status(400).json({ message: 'User already exists' });
     }
 
-    newUser.password = await bcryptjs.hash(newUser.password, 6);
-    await studentCollection.insertOne(newUser);
-    res.status(201).json({ message: 'User created' });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new Student({ email, password: hashedPassword, aparId, projects });
+
+    await newUser.save();
+    res.status(201).json({ message: 'Student registered successfully' });
 }));
 
-// User login
+// Student Login
 studentApp.post('/login', expressAsyncHandler(async (req, res) => {
-    const userCred = req.body;
-    const dbUser = await studentCollection.findOne({ email: userCred.email });
+    const { email, password } = req.body;
 
+    const dbUser = await Student.findOne({ email });
     if (!dbUser) {
         return res.status(401).json({ message: 'Invalid email' });
     }
 
-    const isPasswordCorrect = await bcryptjs.compare(userCred.password, dbUser.password);
+    const isPasswordCorrect = await bcrypt.compare(password, dbUser.password);
     if (!isPasswordCorrect) {
         return res.status(401).json({ message: 'Incorrect password' });
     }
 
     const token = jwt.sign(
-        { email: dbUser.email },
-        process.env.SECRET_KEY,  // Fixed key name
+        { userId: dbUser._id, email: dbUser.email, userType: dbUser.userType },
+        process.env.SECRET_KEY,
         { expiresIn: '1d' }
     );
 
-    res.json({ message: "Login successful", token, user: dbUser });
+    res.json({ message: 'Login successful', token, user: { email: dbUser.email, userType: dbUser.userType } });
 }));
 
 module.exports = studentApp;
