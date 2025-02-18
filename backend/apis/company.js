@@ -1,54 +1,68 @@
 const express = require('express');
-const companyApp = express.Router();
-const bcryptjs = require('bcryptjs');
-const expressAsyncHandler = require('express-async-handler');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const verifyToken = require('../middlewares/verifyToken');  // Fixed path
-
+const expressAsyncHandler = require('express-async-handler');
+const Company = require('../models/companymodel');
 require('dotenv').config();
 
-let companyCollection;
+const companyApp = express.Router();
 
-companyApp.use((req, res, next) => {
-    companyCollection = req.app.get('companycollection');
-    next();
-});
-
-// Create a new user
+// Company Registration
 companyApp.post('/register', expressAsyncHandler(async (req, res) => {
-    const newUser = req.body;
-    const existingUser = await companyCollection.findOne({ email: newUser.email });
+    const { email, password, companyName, location, description, website } = req.body;
 
-    if (existingUser) {
-        return res.status(400).json({ message: 'User already exists' });
+    // Check if all required fields are provided
+    if (!password || !email || !companyName) {
+        return res.status(400).json({ message: 'Email, password, and company name are required' });
     }
 
-    newUser.password = await bcryptjs.hash(newUser.password, 6);
-    await companyCollection.insertOne(newUser);
-    res.status(201).json({ message: 'User created' });
+    // Check if email already exists
+    const existingCompany = await Company.findOne({ email });
+    if (existingCompany) {
+        return res.status(400).json({ message: 'Email is already taken' });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create new company
+    const newCompany = new Company({
+        email,
+        password: hashedPassword,
+        companyName,
+        location,
+        description,
+        website,
+        
+    });
+
+    // Save to database
+    await newCompany.save();
+
+    res.status(201).json({ message: 'Company registered successfully' });
 }));
 
-// User login
+// Company Login
 companyApp.post('/login', expressAsyncHandler(async (req, res) => {
-    const userCred = req.body;
-    const dbUser = await companyCollection.findOne({ email: userCred.email });
+    const { email, password } = req.body;
 
+    const dbUser = await Company.findOne({ email });
     if (!dbUser) {
         return res.status(401).json({ message: 'Invalid email' });
     }
 
-    const isPasswordCorrect = await bcryptjs.compare(userCred.password, dbUser.password);
+    const isPasswordCorrect = await bcrypt.compare(password, dbUser.password);
     if (!isPasswordCorrect) {
         return res.status(401).json({ message: 'Incorrect password' });
     }
 
     const token = jwt.sign(
-        { email: dbUser.email },
-        process.env.SECRET_KEY,  // Fixed key name
+        { userId: dbUser._id, email: dbUser.email, userType: dbUser.userType },
+        process.env.SECRET_KEY,
         { expiresIn: '1d' }
     );
 
-    res.json({ message: "Login successful", token, user: dbUser });
+    res.json({ message: 'Login successful', token, user: { email: dbUser.email, userType: dbUser.userType } });
 }));
 
 module.exports = companyApp;

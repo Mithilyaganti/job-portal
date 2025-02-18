@@ -1,13 +1,42 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 export default function LoginPage() {
-  const [role, setRole] = useState("student");
+  const navigate = useNavigate();
+  const [userType, setUserType] = useState("student");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const payload = { email, password };
+      const url = userType === "student"
+        ? "http://localhost:4000/student/login"
+        : "http://localhost:4000/company/login";
+
+      const response = await axios.post(url, payload);
+
+      alert("Login successful!");
+      localStorage.setItem('isLoggedIn', 'true');
+
+      if (userType === "student") {
+        navigate("/studentprofile");
+      } else {
+        navigate("/companyprofile");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed. Please try again.");
+    }
+  };
 
   return (
     <div
@@ -27,22 +56,19 @@ export default function LoginPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <Card
-                className="p-4 shadow-lg rounded-4"
-                style={{
-                  background: "white",
-                  border: "none",
-                }}
-              >
+              <Card className="p-4 shadow-lg rounded-4" style={{ background: "white", border: "none" }}>
                 <h2 className="text-center mb-4 fw-bold" style={{ color: "#4A00E0" }}>
                   Login to Your Account
                 </h2>
-                <Form>
-                  <Form.Group controlId="role" className="mb-3">
+
+                {error && <p className="text-danger text-center">{error}</p>}
+
+                <Form onSubmit={handleSubmit}>
+                  <Form.Group controlId="userType" className="mb-3">
                     <Form.Label className="fw-semibold">Select Role</Form.Label>
                     <Form.Select
-                      value={role}
-                      onChange={(e) => setRole(e.target.value)}
+                      value={userType}
+                      onChange={(e) => setUserType(e.target.value)}
                       className="rounded-3"
                     >
                       <option value="student">Student</option>
@@ -58,6 +84,7 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="rounded-3"
+                      required
                     />
                   </Form.Group>
 
@@ -69,18 +96,14 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="rounded-3"
+                      required
                     />
                   </Form.Group>
 
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <Form.Check type="checkbox" label="Remember Me" />
-                    <Link to="/forgot-password" className="text-primary fw-semibold" style={{ textDecoration: "none" }}>
-                      Forgot Password?
-                    </Link>
-                  </div>
 
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button
+                      type="submit"
                       variant="primary"
                       className="w-100 fw-bold rounded-3"
                       style={{ backgroundColor: "#4A00E0", border: "none" }}
